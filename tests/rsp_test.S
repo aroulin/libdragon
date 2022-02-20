@@ -16,6 +16,7 @@
         RSPQ_DefineCommand command_reset, 4          # 0x05
         RSPQ_DefineCommand command_test_high, 4      # 0x06
         RSPQ_DefineCommand command_reset_log, 4      # 0x07
+        RSPQ_DefineCommand command_send_rdp,  8      # 0xF8
 	RSPQ_EndOverlayHeader
 
     .align 3
@@ -26,6 +27,8 @@ TEST_VARIABLE: .long 0
 TEST_PADDING2:  .long 0
 TEST_VARIABLE2: .long 0
 OVL_TEST_SAVED_DATA_END:
+
+TEST_RDP_STAGING: .quad 0
 
 BIG_LOG_PTR: .long 0
 
@@ -105,3 +108,10 @@ command_reset_log:
     # Reset the big log pointer to the start
     jr ra
     sw zero, %lo(BIG_LOG_PTR)
+
+command_send_rdp:
+    li s4, %lo(TEST_RDP_STAGING)
+    sw zero, 0(s4)
+    sw a1, 4(s4)
+    li t0, 8
+    jal_and_j RSPQ_RdpSendDynamic, RSPQ_Loop
